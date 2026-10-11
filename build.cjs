@@ -1,0 +1,10 @@
+'use strict';
+const {spawnSync}=require('node:child_process');
+const {mkdirSync,copyFileSync,readdirSync,rmSync}=require('node:fs');
+const {join}=require('node:path');
+const tests=readdirSync(join(__dirname,'tests')).filter(f=>f.endsWith('.test.cjs')).map(f=>join('tests',f));
+const result=spawnSync(process.execPath,['--test',...tests],{cwd:__dirname,stdio:'inherit'});
+if(result.status!==0)process.exit(result.status||1);
+const output=join(__dirname,'dist');rmSync(output,{recursive:true,force:true});mkdirSync(output);
+for(const file of ['index.html','styles.css','trust-rules.js','app.js'])copyFileSync(join(__dirname,file),join(output,file));
+console.log('Verified static runtime copied to dist.');
